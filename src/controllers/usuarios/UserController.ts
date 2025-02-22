@@ -2,10 +2,10 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { validationResult } from 'express-validator';
 import bcrypt from 'bcryptjs';
-import { UsuarioModel } from '../../database/models/usuarioModel';
+import { UserModel } from '../../database/models/UserModel';
 
-export class UsuarioControlador {
-  static async criar(req: Request, res: Response): Promise<void> {
+export class UserController {
+  static async create(req: Request, res: Response): Promise<void> {
     
     const erros = validationResult(req);
     if (!erros.isEmpty()) {
@@ -13,26 +13,26 @@ export class UsuarioControlador {
       return;
     }
 
-    const { nome, email, senha } = req.body;
+    const { name, email, password } = req.body;
 
     try {
 
-      const usuarioExiste = await UsuarioModel.emailEstaCadastrado(email);
-      if (usuarioExiste) {
+      const userExists = await UserModel.emailIsRegistered(email);
+      if (userExists) {
         res.status(StatusCodes.BAD_REQUEST).json({ mensagem: 'Já existe usuário cadastrado com esse e-mail' });
         return;
       }
 
-      const senhaHash = await bcrypt.hash(senha, 10); 
+      const passwordHash = await bcrypt.hash(password, 10); 
 
-      const novoUsuario = await UsuarioModel.criarUsuario(nome, email, senhaHash);
+      const newUser = await UserModel.createUser(name, email, passwordHash);
 
       res.status(StatusCodes.CREATED).json({
         mensagem: 'Usuário criado com sucesso',
         usuario: {
-          id: novoUsuario.id,
-          nome: novoUsuario.nome,
-          email: novoUsuario.email,
+          id: newUser.id,
+          name: newUser.name,
+          email: newUser.email,
         }
       });
     } catch (erro) {

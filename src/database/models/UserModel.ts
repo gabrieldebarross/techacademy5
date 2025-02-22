@@ -1,49 +1,49 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from '../connection';
 
-interface AtributosUsuarios {
+interface AtributesUser {
     id: number,
-    nome: string,
+    name: string,
     email: string,
-    senha: string
+    password: string
 }
 
-interface AtributosCriacaoUsuario extends Optional<AtributosUsuarios, 'id'> { };
+interface AtributesCreateUser extends Optional<AtributesUser, 'id'> { };
 
-export class UsuarioModel extends Model<AtributosUsuarios, AtributosCriacaoUsuario> implements AtributosUsuarios {
+export class UserModel extends Model<AtributesUser, AtributesCreateUser> implements AtributesUser {
     public id!: number;
-    public nome!: string;
+    public name!: string;
     public email!: string;
-    public senha!: string;
+    public password!: string;
 
-    static async emailEstaCadastrado(email: string): Promise<UsuarioModel | null> {
-        return await UsuarioModel.findOne({
+    static async emailIsRegistered(email: string): Promise<UserModel | null> {
+        return await UserModel.findOne({
             where: {
                 email
             }
         })
     }
 
-    static async criarUsuario(nome: string, email: string, senha: string): Promise<UsuarioModel> {
+    static async createUser(name: string, email: string, password: string): Promise<UserModel> {
         const bcrypt = require('bcryptjs');
-        const senhaCriptografada = await bcrypt.hash(senha, 10)
+        const passwordEncrypted = await bcrypt.hash(password, 10)
 
-        return await UsuarioModel.create({
-            nome,
+        return await UserModel.create({
+            name,
             email,
-            senha: senhaCriptografada,
+            password: passwordEncrypted,
         });
     }
 }
 
-UsuarioModel.init(
+UserModel.init(
     {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,
         },
-        nome: {
+        name: {
             type: DataTypes.STRING,
             allowNull: false,
         },
@@ -55,7 +55,7 @@ UsuarioModel.init(
                 isEmail: { msg: 'Formato de email inválido' },
             },
         },
-        senha: {
+        password: {
             type: DataTypes.STRING,
             allowNull: false,
         }, 
