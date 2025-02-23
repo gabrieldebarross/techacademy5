@@ -16,14 +16,6 @@ export class UserModel extends Model<AtributesUser, AtributesCreateUser> impleme
     public email!: string;
     public password!: string;
 
-    static async emailIsRegistered(email: string): Promise<UserModel | null> {
-        return await UserModel.findOne({
-            where: {
-                email
-            }
-        })
-    }
-
     static async createUser(name: string, email: string, password: string): Promise<UserModel> {
         const bcrypt = require('bcryptjs');
         const passwordEncrypted = await bcrypt.hash(password, 10)
@@ -33,6 +25,14 @@ export class UserModel extends Model<AtributesUser, AtributesCreateUser> impleme
             email,
             password: passwordEncrypted,
         });
+    }
+
+    static async emailIsRegistered(email: string): Promise<UserModel | null> {
+        return await UserModel.findOne({
+            where: {
+                email
+            }
+        })
     }
 }
 
@@ -62,7 +62,7 @@ UserModel.init(
     },
     {
         sequelize,
-        tableName: 'usuarios',
+        tableName: 'users',
         timestamps: false,
     } 
 );
