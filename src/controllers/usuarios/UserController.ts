@@ -142,7 +142,7 @@ export class UserController {
       await validUser.save();
 
       res.status(StatusCodes.OK).json({
-        message: 'Usuário atuilizado com sucesso'
+        message: 'Usuário atualizado com sucesso'
       })
     } catch (erro) {
       console.log(erro);

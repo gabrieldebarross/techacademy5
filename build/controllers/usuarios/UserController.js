@@ -138,7 +138,7 @@ class UserController {
                 validUser.password = passwordHash;
                 yield validUser.save();
                 res.status(http_status_codes_1.StatusCodes.OK).json({
-                    message: 'Usuário atuilizado com sucesso'
+                    message: 'Usuário atualizado com sucesso'
                 });
             }
             catch (erro) {
