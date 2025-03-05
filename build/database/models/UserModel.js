@@ -20,11 +20,10 @@ class UserModel extends sequelize_1.Model {
     static createUser(name, email, password) {
         return __awaiter(this, void 0, void 0, function* () {
             const bcrypt = require('bcryptjs');
-            const passwordEncrypted = yield bcrypt.hash(password, 10);
             return yield UserModel.create({
                 name,
                 email,
-                password: passwordEncrypted,
+                password: password,
             });
         });
     }

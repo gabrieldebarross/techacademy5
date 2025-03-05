@@ -18,12 +18,11 @@ export class UserModel extends Model<AtributesUser, AtributesCreateUser> impleme
 
     static async createUser(name: string, email: string, password: string): Promise<UserModel> {
         const bcrypt = require('bcryptjs');
-        const passwordEncrypted = await bcrypt.hash(password, 10)
 
         return await UserModel.create({
             name,
             email,
-            password: passwordEncrypted,
+            password: password,
         });
     }
 

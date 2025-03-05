@@ -16,10 +16,7 @@ export class UserController {
             })
             return;
         }
-
-        console.log("Senha fornecida:", password);
-        console.log("Senha armazenada no banco (hash):", user.password);
-
+        
         const passwordValid = await password === user.password;
 
         if(!passwordValid){
@@ -168,7 +165,6 @@ export class UserController {
         })
       }
       const validUser = user as NonNullable<typeof user>;
-
       
       validUser.name = name || validUser.name;
       validUser.email = email || validUser.email;
