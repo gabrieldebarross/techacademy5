@@ -8,16 +8,49 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const http_status_codes_1 = require("http-status-codes");
 const express_validator_1 = require("express-validator");
-const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const UserModel_1 = require("../../database/models/UserModel");
 class UserController {
+    static Login(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { email, password } = req.body;
+                const user = yield UserModel_1.UserModel.findOne({ where: { email } });
+                if (!user) {
+                    res.status(http_status_codes_1.StatusCodes.NOT_FOUND).json({
+                        message: 'Usuário não encontrado'
+                    });
+                    return;
+                }
+                console.log("Senha fornecida:", password);
+                console.log("Senha armazenada no banco (hash):", user.password);
+                const passwordValid = (yield password) === user.password;
+                if (!passwordValid) {
+                    res.status(http_status_codes_1.StatusCodes.UNAUTHORIZED).json({
+                        message: 'Senha inválida'
+                    });
+                    return;
+                }
+                res.status(http_status_codes_1.StatusCodes.OK).json({
+                    message: 'Usuário Logado com sucesso',
+                    user: {
+                        id: user.id,
+                        name: user.name,
+                        email: user.email
+                    }
+                });
+            }
+            catch (erro) {
+                res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
+                    message: 'Erro ao realizar o login',
+                    error: erro
+                });
+            }
+        });
+    }
     static createUser(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const erros = (0, express_validator_1.validationResult)(req);
@@ -36,8 +69,7 @@ class UserController {
                     });
                     return;
                 }
-                const passwordHash = yield bcryptjs_1.default.hash(password, 10);
-                const newUser = yield UserModel_1.UserModel.createUser(name, email, passwordHash);
+                const newUser = yield UserModel_1.UserModel.createUser(name, email, password);
                 res.status(http_status_codes_1.StatusCodes.CREATED).json({
                     message: 'Usuário criado com sucesso',
                     usuario: {
@@ -131,11 +163,9 @@ class UserController {
                     });
                 }
                 const validUser = user;
-                let passwordHash = user.password;
-                passwordHash = yield bcryptjs_1.default.hash(password, 10);
                 validUser.name = name || validUser.name;
                 validUser.email = email || validUser.email;
-                validUser.password = passwordHash;
+                validUser.password = password;
                 yield validUser.save();
                 res.status(http_status_codes_1.StatusCodes.OK).json({
                     message: 'Usuário atualizado com sucesso'

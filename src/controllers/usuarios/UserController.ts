@@ -1,10 +1,50 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { validationResult } from 'express-validator';
-import bcrypt from 'bcryptjs';
 import { UserModel } from '../../database/models/UserModel';
 
 export class UserController {
+
+  static async Login(req: Request, res: Response): Promise<void> {
+    try {
+        const { email, password } = req.body;
+        const user = await UserModel.findOne({ where: { email } });
+
+        if(!user){
+            res.status(StatusCodes.NOT_FOUND).json({
+                message: 'Usuário não encontrado'
+            })
+            return;
+        }
+
+        console.log("Senha fornecida:", password);
+        console.log("Senha armazenada no banco (hash):", user.password);
+
+        const passwordValid = await password === user.password;
+
+        if(!passwordValid){
+            res.status(StatusCodes.UNAUTHORIZED).json({
+                message: 'Senha inválida'
+            })
+            return;
+        }
+
+        res.status(StatusCodes.OK).json({
+            message: 'Usuário Logado com sucesso',
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email
+            }
+        })
+
+        } catch (erro) {
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: 'Erro ao realizar o login',
+                error: erro
+            })
+        }
+    }
   static async createUser(req: Request, res: Response): Promise<void> {
     
     const erros = validationResult(req);
@@ -27,9 +67,7 @@ export class UserController {
         return;
       }
 
-      const passwordHash = await bcrypt.hash(password, 10); 
-
-      const newUser = await UserModel.createUser(name, email, passwordHash);
+      const newUser = await UserModel.createUser(name, email, password);
 
       res.status(StatusCodes.CREATED).json({
         message: 'Usuário criado com sucesso',
@@ -131,12 +169,10 @@ export class UserController {
       }
       const validUser = user as NonNullable<typeof user>;
 
-      let passwordHash = user!.password;
-      passwordHash = await bcrypt.hash(password, 10);
-
+      
       validUser.name = name || validUser.name;
       validUser.email = email || validUser.email;
-      validUser.password = passwordHash;
+      validUser.password = password;
 
 
       await validUser.save();
