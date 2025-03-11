@@ -17,9 +17,11 @@ const http_status_codes_1 = require("http-status-codes");
 const express_validator_1 = require("express-validator");
 const UserModel_1 = require("../../database/models/UserModel");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 class UserController {
     static Login(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
+            const SECRET_KEY = process.env.SECRET_KEY;
             try {
                 const { email, password } = req.body;
                 const user = yield UserModel_1.UserModel.findOne({ where: { email } });
@@ -36,13 +38,21 @@ class UserController {
                     });
                     return;
                 }
+                const token = jsonwebtoken_1.default.sign({
+                    id: user.id,
+                    name: user.name,
+                    email: user.email
+                }, String(SECRET_KEY), // Chave secreta para assinar o token
+                { expiresIn: '1h' } // Duracao do token
+                );
                 res.status(http_status_codes_1.StatusCodes.OK).json({
                     message: 'Usuário Logado com sucesso',
                     user: {
                         id: user.id,
                         name: user.name,
                         email: user.email
-                    }
+                    },
+                    token: token
                 });
             }
             catch (erro) {
