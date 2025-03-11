@@ -15,15 +15,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserModel = void 0;
 const sequelize_1 = require("sequelize");
 const connection_1 = __importDefault(require("../connection"));
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 ;
 class UserModel extends sequelize_1.Model {
     static createUser(name, email, password) {
         return __awaiter(this, void 0, void 0, function* () {
-            const bcrypt = require('bcryptjs');
+            const passwordEncripted = yield bcryptjs_1.default.hash(password, 10);
             return yield UserModel.create({
                 name,
                 email,
-                password: password,
+                password: passwordEncripted,
             });
         });
     }

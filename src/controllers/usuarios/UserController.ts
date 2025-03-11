@@ -2,52 +2,54 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { validationResult } from 'express-validator';
 import { UserModel } from '../../database/models/UserModel';
+import bcrypt from 'bcryptjs';
+
 
 export class UserController {
 
   static async Login(req: Request, res: Response): Promise<void> {
     try {
-        const { email, password } = req.body;
-        const user = await UserModel.findOne({ where: { email } });
+      const { email, password } = req.body;
+      const user = await UserModel.findOne({ where: { email } });
 
-        if(!user){
-            res.status(StatusCodes.NOT_FOUND).json({
-                message: 'Usuário não encontrado'
-            })
-            return;
-        }
-        
-        const passwordValid = await password === user.password;
-
-        if(!passwordValid){
-            res.status(StatusCodes.UNAUTHORIZED).json({
-                message: 'Senha inválida'
-            })
-            return;
-        }
-
-        res.status(StatusCodes.OK).json({
-            message: 'Usuário Logado com sucesso',
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email
-            }
+      if (!user) {
+        res.status(StatusCodes.NOT_FOUND).json({
+          message: 'Usuário não encontrado'
         })
+        return;
+      }
 
-        } catch (erro) {
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                message: 'Erro ao realizar o login',
-                error: erro
-            })
+      const passwordValid = await bcrypt.compare(password, user.password);
+
+      if (!passwordValid) {
+        res.status(StatusCodes.UNAUTHORIZED).json({
+          message: 'Senha inválida'
+        })
+        return;
+      }
+
+      res.status(StatusCodes.OK).json({
+        message: 'Usuário Logado com sucesso',
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email
         }
+      })
+
+    } catch (erro) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: 'Erro ao realizar o login',
+        error: erro
+      })
     }
+  }
   static async createUser(req: Request, res: Response): Promise<void> {
-    
+
     const erros = validationResult(req);
     if (!erros.isEmpty()) {
-      res.status(StatusCodes.BAD_REQUEST).json({ 
-        erros: erros.array() 
+      res.status(StatusCodes.BAD_REQUEST).json({
+        erros: erros.array()
       });
       return;
     }
@@ -58,12 +60,11 @@ export class UserController {
 
       const userExists = await UserModel.emailIsRegistered(email);
       if (userExists) {
-        res.status(StatusCodes.BAD_REQUEST).json({ 
-          message: 'Já existe usuário cadastrado com esse e-mail' 
+        res.status(StatusCodes.BAD_REQUEST).json({
+          message: 'Já existe usuário cadastrado com esse e-mail'
         });
         return;
       }
-
       const newUser = await UserModel.createUser(name, email, password);
 
       res.status(StatusCodes.CREATED).json({
@@ -76,8 +77,8 @@ export class UserController {
       });
     } catch (erro: unknown) {
       console.error(erro);
-      
-      if(erro instanceof Error){
+
+      if (erro instanceof Error) {
         if (erro.name === 'SequelizeUniqueConstraintError') {
           res.status(StatusCodes.BAD_REQUEST).json({
             message: 'Já existe um usuário com este e-mail',
@@ -92,14 +93,14 @@ export class UserController {
     }
   }
 
-  static async getAllUsers(req: Request, res: Response): Promise<void>{
+  static async getAllUsers(req: Request, res: Response): Promise<void> {
     try {
       const users = await UserModel.findAll({
         attributes: { exclude: ['password'] }
       });
 
       res.status(StatusCodes.OK).json(users);
-    } catch(erro: unknown){
+    } catch (erro: unknown) {
       console.log(erro);
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: 'Erro ao buscar os usuários',
@@ -110,101 +111,111 @@ export class UserController {
 
   static async getUsersWithFilters(req: Request, res: Response): Promise<any> {
     try {
-        const { 
-          id, 
-          name, 
-          email 
-        } = req.query;
+      const {
+        id,
+        name,
+        email
+      } = req.query;
 
-        const whereConditions: any = {};
+      const whereConditions: any = {};
 
-        if (id) whereConditions.id = Number(id); 
-        if (name) whereConditions.name = String(name);
-        if (email) whereConditions.email = String(email);
+      if (id) whereConditions.id = Number(id);
+      if (name) whereConditions.name = String(name);
+      if (email) whereConditions.email = String(email);
 
-        const users = await UserModel.findAll({
-            where: whereConditions,
-            attributes: { exclude: ['password'] },
+      const users = await UserModel.findAll({
+        where: whereConditions,
+        attributes: { exclude: ['password'] },
+      });
+
+      if (users.length === 0) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          message: 'Nenhum usuário foi encontrado com os filtros fornecidos',
         });
+      }
 
-        if (users.length === 0) {
-            return res.status(StatusCodes.NOT_FOUND).json({
-              message: 'Nenhum usuário foi encontrado com os filtros fornecidos',
-            });
-        }
-
-        return res.status(StatusCodes.OK).json(users);
+      return res.status(StatusCodes.OK).json(users);
 
     } catch (erro) {
-        console.log(erro);
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            message: 'Erro ao buscar os usuários',
-            erro: erro instanceof Error ? erro.message : 'Erro desconhecido',
-        });
+      console.log(erro);
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: 'Erro ao buscar os usuários',
+        erro: erro instanceof Error ? erro.message : 'Erro desconhecido',
+      });
     }
   }
 
-  static async updateUser(req: Request, res: Response): Promise<any>{
+  static async updateUser(req: Request, res: Response): Promise<any> {
     try {
       const { id } = req.params;
       const { name, email, password } = req.body;
-
+  
       const user = await UserModel.findByPk(id);
-
-      if(!user){
-        res.status(StatusCodes.NOT_FOUND).json({
+  
+      if (!user) {
+        return res.status(StatusCodes.NOT_FOUND).json({
           message: 'Usuário não encontrado'
-        })
+        });
       }
+  
+      if (email) {
+        const emailExist = await UserModel.emailIsRegistered(email);
+  
+        if (emailExist) {
+          return res.status(StatusCodes.BAD_REQUEST).json({
+            message: 'Já possui um usuário cadastrado com esse email'
+          });
+        }
 
-      const emailExist = await UserModel.emailIsRegistered(email);
-
-      if(emailExist){
-        return res.status(StatusCodes.BAD_REQUEST).json({
-          message: 'Já possui um usuário cadastrado com esse email'
-        })
+        user.email = email;
       }
-      const validUser = user as NonNullable<typeof user>;
-      
-      validUser.name = name || validUser.name;
-      validUser.email = email || validUser.email;
-      validUser.password = password;
+  
+      user.name = name || user.name;
 
-
-      await validUser.save();
-
-      res.status(StatusCodes.OK).json({
+      if (password) {
+        user.password = await bcrypt.hash(password, 10);
+      }
+  
+      await user.save();
+  
+      return res.status(StatusCodes.OK).json({
         message: 'Usuário atualizado com sucesso'
-      })
+      });
+  
     } catch (erro) {
       console.log(erro);
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: 'Erro ao atualizar o usuário',
+        erro: erro instanceof Error ? erro.message : 'Erro desconhecido'
+      });
     }
   }
+  
 
-  static async deleteUser(req: Request, res: Response): Promise<any>{
+  static async deleteUser(req: Request, res: Response): Promise<any> {
     const { id } = req.query;
     const userId = Number(id);
 
-    if(isNaN(userId)){
+    if (isNaN(userId)) {
       return res.send(StatusCodes.BAD_REQUEST).json({
         message: 'ID inválido'
       })
     }
 
     try {
-    const userDelete = await UserModel.destroy({
-      where: { id: userId}
-    });
+      const userDelete = await UserModel.destroy({
+        where: { id: userId }
+      });
 
-    if(userDelete === 0){
-      return res.status(StatusCodes.NOT_FOUND).json({
-        message: 'Usuário não encontrado'
-      })
-    }
+      if (userDelete === 0) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          message: 'Usuário não encontrado'
+        })
+      }
 
-    res.status(StatusCodes.OK).json({
-      message: 'Usuário excluido com sucesso'
-    });
+      res.status(StatusCodes.OK).json({
+        message: 'Usuário excluido com sucesso'
+      });
 
     } catch (erro) {
       console.log(erro);

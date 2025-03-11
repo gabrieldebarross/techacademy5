@@ -8,11 +8,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const http_status_codes_1 = require("http-status-codes");
 const express_validator_1 = require("express-validator");
 const UserModel_1 = require("../../database/models/UserModel");
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 class UserController {
     static Login(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -25,9 +29,7 @@ class UserController {
                     });
                     return;
                 }
-                console.log("Senha fornecida:", password);
-                console.log("Senha armazenada no banco (hash):", user.password);
-                const passwordValid = (yield password) === user.password;
+                const passwordValid = yield bcryptjs_1.default.compare(password, user.password);
                 if (!passwordValid) {
                     res.status(http_status_codes_1.StatusCodes.UNAUTHORIZED).json({
                         message: 'Senha inválida'
@@ -152,27 +154,34 @@ class UserController {
                 const { name, email, password } = req.body;
                 const user = yield UserModel_1.UserModel.findByPk(id);
                 if (!user) {
-                    res.status(http_status_codes_1.StatusCodes.NOT_FOUND).json({
+                    return res.status(http_status_codes_1.StatusCodes.NOT_FOUND).json({
                         message: 'Usuário não encontrado'
                     });
                 }
-                const emailExist = yield UserModel_1.UserModel.emailIsRegistered(email);
-                if (emailExist) {
-                    return res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({
-                        message: 'Já possui um usuário cadastrado com esse email'
-                    });
+                if (email) {
+                    const emailExist = yield UserModel_1.UserModel.emailIsRegistered(email);
+                    if (emailExist) {
+                        return res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({
+                            message: 'Já possui um usuário cadastrado com esse email'
+                        });
+                    }
+                    user.email = email;
                 }
-                const validUser = user;
-                validUser.name = name || validUser.name;
-                validUser.email = email || validUser.email;
-                validUser.password = password;
-                yield validUser.save();
-                res.status(http_status_codes_1.StatusCodes.OK).json({
+                user.name = name || user.name;
+                if (password) {
+                    user.password = yield bcryptjs_1.default.hash(password, 10);
+                }
+                yield user.save();
+                return res.status(http_status_codes_1.StatusCodes.OK).json({
                     message: 'Usuário atualizado com sucesso'
                 });
             }
             catch (erro) {
                 console.log(erro);
+                return res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
+                    message: 'Erro ao atualizar o usuário',
+                    erro: erro instanceof Error ? erro.message : 'Erro desconhecido'
+                });
             }
         });
     }

@@ -1,5 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from '../connection';
+import bcrypt from 'bcryptjs';
 
 interface AtributesUser {
     id: number,
@@ -17,12 +18,12 @@ export class UserModel extends Model<AtributesUser, AtributesCreateUser> impleme
     public password!: string;
 
     static async createUser(name: string, email: string, password: string): Promise<UserModel> {
-        const bcrypt = require('bcryptjs');
+        const passwordEncripted = await bcrypt.hash(password, 10);
 
         return await UserModel.create({
             name,
             email,
-            password: password,
+            password: passwordEncripted,
         });
     }
 
