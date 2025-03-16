@@ -6,7 +6,13 @@ const JWT_EXPIRES_IN = '7d';
 
 class authUtils {
     static async generateToken(user: UserModel): Promise<string> {
-        return jwt.sign({ user }, String(JWT_SECRET), { expiresIn: JWT_EXPIRES_IN });
+        const payloadUser = {
+            id: user.id,
+            name: user.name,
+            email: user.email
+        }
+
+        return jwt.sign({ payloadUser }, String(JWT_SECRET), { expiresIn: JWT_EXPIRES_IN });
     }
 
     static async verifyToken(token: string): Promise<any>{

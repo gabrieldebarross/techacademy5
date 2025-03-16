@@ -17,10 +17,8 @@ const authUtils_1 = __importDefault(require("../utils/authUtils"));
 const http_status_codes_1 = require("http-status-codes");
 const authMiddleware = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    console.log("🔹 authMiddleware foi chamado!");
     const token = (_a = req.header('Authorization')) === null || _a === void 0 ? void 0 : _a.replace('Bearer ', '');
     if (!token) {
-        console.log("Nenhum token foi enviado!");
         res.status(http_status_codes_1.StatusCodes.UNAUTHORIZED).json({
             message: 'Acesso negado',
             error: 'Token não encontrado'
@@ -30,11 +28,10 @@ const authMiddleware = (req, res, next) => __awaiter(void 0, void 0, void 0, fun
     try {
         const decoded = yield authUtils_1.default.verifyToken(token);
         req.body.user = decoded.user;
-        console.log("Token válido! Usuário autenticado:", decoded.user);
+        console.log("Token válido! Usuário autenticado:", decoded.payloadUser);
         return next();
     }
     catch (error) {
-        console.log("Token inválido!", error);
         res.status(http_status_codes_1.StatusCodes.UNAUTHORIZED).json({
             message: 'Acesso negado',
             error: 'Token inválido'

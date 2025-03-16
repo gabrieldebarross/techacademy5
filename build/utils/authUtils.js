@@ -18,7 +18,12 @@ const JWT_EXPIRES_IN = '7d';
 class authUtils {
     static generateToken(user) {
         return __awaiter(this, void 0, void 0, function* () {
-            return jsonwebtoken_1.default.sign({ user }, String(JWT_SECRET), { expiresIn: JWT_EXPIRES_IN });
+            const payloadUser = {
+                id: user.id,
+                name: user.name,
+                email: user.email
+            };
+            return jsonwebtoken_1.default.sign({ payloadUser }, String(JWT_SECRET), { expiresIn: JWT_EXPIRES_IN });
         });
     }
     static verifyToken(token) {
