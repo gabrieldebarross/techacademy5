@@ -3,7 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 import { validationResult } from 'express-validator';
 import { UserModel } from '../../database/models/UserModel';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import authUtils from '../../utils/authUtils';
 
 
 export class UserController {
@@ -31,23 +31,10 @@ export class UserController {
         return;
       }
 
-      const token = jwt.sign(
-        { // Playload com as infos do usuário
-          id: user.id,
-          name: user.name,
-          email: user.email
-        },
-        String(SECRET_KEY), // Chave secreta para assinar o token
-        { expiresIn: '1h'} // Duracao do token
-      )
+      const token = await authUtils.generateToken(user)
 
       res.status(StatusCodes.OK).json({
         message: 'Usuário Logado com sucesso',
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email
-        },
         token: token
       })
 
