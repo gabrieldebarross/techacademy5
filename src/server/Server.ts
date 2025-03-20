@@ -6,15 +6,18 @@ import { routerUser } from './routes/userRoutes';
 
 const server = express();
 
-server.use(express.json());
-server.use(routerUser);
 server.use(cors({
-    origin: ['*'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: ['http://localhost:5173'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
     preflightContinue: false,
     optionsSuccessStatus: 204
-}))
+}));
+server.options('*', cors());
+
+server.use(express.json());
+server.use(routerUser);
+
 
 export { server };

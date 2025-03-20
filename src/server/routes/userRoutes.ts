@@ -13,7 +13,7 @@ routerUser.post('/user', [
 ], UserController.createUser);
 
 
-routerUser.get('/user',authMiddleware, UserController.getUsersWithFilters);
+routerUser.get('/user', authMiddleware, UserController.getUsersWithFilters);
 routerUser.get('/user', authMiddleware, UserController.getAllUsers);
 
 

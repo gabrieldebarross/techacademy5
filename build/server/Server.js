@@ -10,13 +10,14 @@ const cors_1 = __importDefault(require("cors"));
 const userRoutes_1 = require("./routes/userRoutes");
 const server = (0, express_1.default)();
 exports.server = server;
-server.use(express_1.default.json());
-server.use(userRoutes_1.routerUser);
 server.use((0, cors_1.default)({
-    origin: ['*'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: ['http://localhost:5173'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
     preflightContinue: false,
     optionsSuccessStatus: 204
 }));
+server.options('*', (0, cors_1.default)());
+server.use(express_1.default.json());
+server.use(userRoutes_1.routerUser);
