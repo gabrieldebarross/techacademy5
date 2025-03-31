@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { UserController } from '../../controllers/usuarios/UserController';
+import { UserController } from '../../controllers/UserController';
 import { check } from 'express-validator';
 import { authMiddleware } from '../../middleware/authMiddleware';
 

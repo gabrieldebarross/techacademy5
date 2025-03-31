@@ -1,13 +1,12 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { validationResult } from 'express-validator';
-import { UserModel } from '../../database/models/UserModel';
+import { UserModel } from '../database/models/UserModel';
 import bcrypt from 'bcryptjs';
-import authUtils from '../../utils/authUtils';
+import authUtils from '../utils/authUtils';
 
 
 export class UserController {
-
   static async Login(req: Request, res: Response): Promise<void> {
     const SECRET_KEY = process.env.SECRET_KEY;
 
