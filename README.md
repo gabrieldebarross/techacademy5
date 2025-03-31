@@ -1,4 +1,4 @@
-# API de CRUDs - Projeto de Faculdade - Gabriel de Barros
+# API de CRUDs - Projeto de Faculdade - To-Do List
 
 Este projeto consiste em uma **API RESTful** desenvolvida como parte de um trabalho acadêmico. A API foi projetada para gerenciar dados com as operações de **Create**, **Read**, **Update** e **Delete** (CRUD) utilizando **Node.js**, **TypeScript**, **Sequelize** e **MySQL**.
 
@@ -38,11 +38,11 @@ Para rodar este projeto localmente, siga os seguintes passos:
 
 4. Crie um arquivo .env na raiz do projeto e configure as variáveis de ambiente necessárias (como as credenciais do banco de dados):
 
-    DB_HOST=localhost
-    DB_USER=root
-    DB_PASSWORD=sua-senha
-    DB_NAME=nome-do-banco
-    SECRET_KEY==seu-segredo
+- DB_HOST=localhost
+- DB_USER=root
+- DB_PASSWORD=sua-senha
+- DB_NAME=nome-do-banco
+- SECRET_KEY=seu-segredo
 
 5. Para rodar a aplicação:
     npm run start
