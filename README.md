@@ -57,9 +57,9 @@ Abaixo estão as rotas disponíveis na API para as operações de Create, Read, 
 - **POST /user/login**: Realiza o login de um usuário.
 - **POST /user**: Cria um novo usuário. Requer dados válidos de email, password, e name.
 - **GET /user**: Retorna todos os usuários com filtros aplicados.
-- **GET /user/all**: Retorna todos os usuários cadastrados.
+- **GET /user**: Retorna todos os usuários cadastrados.
 - **PUT /user/:id**: Atualiza os dados de um usuário específico.
-- **DELETE /user**: Deleta um usuário.
+- **DELETE /user/**: Deleta um usuário.
 
 ## 2. Tarefas (/tasks)
 
