@@ -93,9 +93,9 @@ Abaixo estão as rotas disponíveis na API para as operações de Create, Read, 
 - **PUT /categories/:id**: Atualiza uma categoria específica por ID.
 - **DELETE /categories/:id**: Deleta uma categoria específica por ID.
 
-## Exemplos de Requisições
+## Exemplo de Requisição
 
-### Exemplo de Requisição para Criar Usuário
+### Requisição para Criar Usuário
 
 **POST /user**:
 
@@ -104,17 +104,4 @@ Abaixo estão as rotas disponíveis na API para as operações de Create, Read, 
   "name": "João Silva",
   "email": "joao.silva@email.com",
   "password": "senha123"
-}
-
-### Exemplos de Requisição para Criar uma Tarefa
-
-```json
-{
-  "title": "Reuniao",
-  "description": "Descrição da tarefa",
-  "status": "pendente",
-  "due_date": "2025-04-30",
-  "user_id": 1,
-  "category_id": 1,
-  "priority_id": 1
 }
