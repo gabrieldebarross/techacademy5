@@ -45,6 +45,7 @@ Para rodar este projeto localmente, siga os seguintes passos:
 - SECRET_KEY=seu-segredo
 
 5. Para rodar a aplicação:
+    npm run build
     npm run start
 
 # Rotas da API
